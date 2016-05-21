@@ -50,6 +50,8 @@ public:
 	void set(unsigned int pos, T value);
 	//gibt größe zurück
 	unsigned int length();
+	//hängt neues elemnt mit value an
+	void pushBack(T value);
 
 };
 
@@ -183,6 +185,19 @@ unsigned int sllist<T>::length()
 		walker = walker->next;
 	}
 	return len;
+}
+
+template<class T>
+void sllist<T>::pushBack(T value)
+{
+	if (length() == 0)
+	{
+		head = new sllist_elem(value);
+	}
+	else
+	{
+		ptr_pos(length() - 1)->next = new sllist_elem(value);
+	}
 }
 
 int main()
