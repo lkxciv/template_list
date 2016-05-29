@@ -9,14 +9,14 @@ public:
 
 	sllist_elem(sllist_elem<T> *next = NULL);
 	//mit value initialisieren
-	sllist_elem(T value, sllist_elem<T> *next = NULL);
+	sllist_elem(const T & value, sllist_elem<T> *next = NULL);
 };
 
 template<class T>
 sllist_elem<T>::sllist_elem(sllist_elem<T>* next) : next(next){}
 
 template<class T>
-sllist_elem<T>::sllist_elem(T value, sllist_elem<T>* next) : value(value), next(next){}
+sllist_elem<T>::sllist_elem(const T & value, sllist_elem<T>* next) : value(value), next(next){}
 
 template<class T>
 class sllist
@@ -26,7 +26,7 @@ private:
 	//! Verhindert duplikation zw. copy konstr und assignment
 	void deepCopy(const sllist<T> & orig);
 	//gibt pointer auf stelle in liste zurück
-	sllist_elem<T> *ptr_pos(unsigned int pos);
+	sllist_elem<T> *ptrPos(unsigned int pos);
 public:
 	//Standardkonstr. mit optionalem Head
 	sllist(sllist_elem<T> *head = NULL);
@@ -47,11 +47,20 @@ public:
 	//returnt value an stelle(ab 0)
 	T get(unsigned int pos) const;
 	//wert an Stelle setzten
-	void set(unsigned int pos, T value);
+	void set(unsigned int pos, const T & value);
 	//gibt größe zurück
 	unsigned int length() const;
 	//hängt neues elemnt mit value an
-	void pushBack(T value);
+	void pushBack(const T & value);
+	//löscht element an stelle
+	void delElem(unsigned int pos);
+
+	//hängt andere Liste ans Ende
+	void addToEnd(const sllist<T> & addlist);
+	//macht das gleich wie addToEnd()
+	sllist<T> & operator+=(const sllist<T> & addlist);
+	//Kopiert 2 aneinandergehängte listen
+	sllist<T> operator+(const sllist<T> & l2) const;
 
 };
 
@@ -78,7 +87,7 @@ void sllist<T>::deepCopy(const sllist<T> & orig)
 }
 
 template<class T>
-sllist_elem<T> *sllist<T>::ptr_pos(unsigned int pos)
+sllist_elem<T> *sllist<T>::ptrPos(unsigned int pos)
 {
 	sllist_elem<T> *walker = head;
 	//bei null garnicht
@@ -166,13 +175,13 @@ sllist<T> & sllist<T>::operator=(sllist<T> && move)
 template<class T>
 T sllist<T>::get(unsigned int pos) const
 {
-	return ptr_pos(pos)->value;
+	return ptrPos(pos)->value;
 }
 
 template<class T>
-void sllist<T>::set(unsigned int pos, T value)
+void sllist<T>::set(unsigned int pos, const T & value)
 {
-	ptr_pos(pos)->value = value;
+	ptrPos(pos)->value = value;
 }
 
 template<class T>
@@ -188,16 +197,67 @@ unsigned int sllist<T>::length() const
 }
 
 template<class T>
-void sllist<T>::pushBack(T value)
+void sllist<T>::pushBack(const T & value)
 {
 	if (length() == 0)
 	{
-		head = new sllist_elem(value);
+		head = new sllist_elem<T>(value);
 	}
 	else
 	{
-		ptr_pos(length() - 1)->next = new sllist_elem(value);
+		ptrPos(length() - 1)->next = new sllist_elem<T>(value);
 	}
+}
+
+template<class T>
+void sllist<T>::delElem(unsigned int pos)
+{
+	sllist_elem<T> *after = ptrPos(pos + 1);
+	if (pos == 0)
+	{
+		delete head;
+		head = after;
+	}
+	else
+	{
+		sllist_elem<T> *before = ptrPos(pos - 1);
+		delete before->next;
+		before->next = after;
+	}
+}
+
+template<class T>
+void sllist<T>::addToEnd(const sllist<T> & addlist)
+{
+	//Kopie von addlist
+	sllist<T> temp = sllist<T>(addlist);
+	if (head == NULL)
+	{
+		//direkt auf head hängen
+		this->head = temp.head;
+	}
+	else
+	{
+		//head vom temp ans ende hängen
+		this->ptrPos(length() - 1)->next = temp.head;
+	}
+	//inhalt vorm destruktor retten
+	temp.head = NULL;
+}
+
+template<class T>
+sllist<T>& sllist<T>::operator+=(const sllist<T> & addlist)
+{
+	this->addToEnd(addlist);
+	return *this;
+}
+
+template<class T>
+sllist<T> sllist<T>::operator+(const sllist<T> & l2) const
+{
+	sllist<T> res = sllist<T>(*this);
+	res.addToEnd(l2);
+	return res;
 }
 
 int main()
@@ -205,6 +265,8 @@ int main()
 	sllist<int> test1(3);
 	sllist<int> test2(2);
 	test2 = test1;
+	test2.pushBack((int)2);
+	test2 += test1;
 	
 	return 0;
 }
