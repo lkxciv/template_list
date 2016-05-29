@@ -45,11 +45,11 @@ public:
 	sllist<T> & operator=(sllist<T> && move);
 
 	//returnt value an stelle(ab 0)
-	T get(unsigned int pos);
+	T get(unsigned int pos) const;
 	//wert an Stelle setzten
 	void set(unsigned int pos, T value);
 	//gibt größe zurück
-	unsigned int length();
+	unsigned int length() const;
 	//hängt neues elemnt mit value an
 	void pushBack(T value);
 
@@ -164,7 +164,7 @@ sllist<T> & sllist<T>::operator=(sllist<T> && move)
 }
 
 template<class T>
-T sllist<T>::get(unsigned int pos)
+T sllist<T>::get(unsigned int pos) const
 {
 	return ptr_pos(pos)->value;
 }
@@ -176,7 +176,7 @@ void sllist<T>::set(unsigned int pos, T value)
 }
 
 template<class T>
-unsigned int sllist<T>::length()
+unsigned int sllist<T>::length() const
 {
 	unsigned int len = 0;
 	sllist_elem<T> *walker = head;
